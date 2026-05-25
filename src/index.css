@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   Theme tokens
+   ----------------------------------------------------------------------------
+   Warm, paper-like palette inspired by traditional ledger notebooks.
+   Primary is a deep saffron-brown (think aged leather). Secondary is teal.
+   Background is an off-white, slightly warm — easy on the eyes for long use.
+   ============================================================================ */
+@layer base {
+  :root {
+    --background: 36 35% 97%;          /* warm off-white */
+    --foreground: 24 20% 12%;          /* deep brown-black */
+
+    --card: 0 0% 100%;
+    --card-foreground: 24 20% 12%;
+
+    --primary: 22 60% 32%;             /* saffron-brown */
+    --primary-foreground: 36 35% 97%;
+
+    --secondary: 178 35% 36%;          /* deep teal */
+    --secondary-foreground: 36 35% 97%;
+
+    --muted: 32 20% 92%;
+    --muted-foreground: 24 10% 40%;
+
+    --accent: 38 80% 92%;              /* soft amber wash */
+    --accent-foreground: 22 60% 22%;
+
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 145 55% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 32 90% 50%;
+    --warning-foreground: 24 30% 12%;
+
+    --border: 32 25% 86%;
+    --input: 32 25% 86%;
+    --ring: 22 60% 32%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 24 15% 9%;
+    --foreground: 36 25% 92%;
+    --card: 24 15% 12%;
+    --card-foreground: 36 25% 92%;
+    --primary: 32 80% 60%;
+    --primary-foreground: 24 15% 9%;
+    --secondary: 178 35% 50%;
+    --secondary-foreground: 24 15% 9%;
+    --muted: 24 10% 18%;
+    --muted-foreground: 36 15% 70%;
+    --accent: 24 10% 18%;
+    --accent-foreground: 36 25% 92%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 145 50% 50%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 80% 55%;
+    --warning-foreground: 24 30% 12%;
+    --border: 24 10% 22%;
+    --input: 24 10% 22%;
+    --ring: 32 80% 60%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  /* Auto-pick a Telugu-friendly font when Telugu characters render */
+  :lang(te), [lang='te'] {
+    font-family: 'Noto Sans Telugu', 'Plus Jakarta Sans', sans-serif;
+  }
+
+  h1, h2, h3 {
+    @apply font-display tracking-tight;
+    font-feature-settings: 'ss01', 'liga';
+  }
+
+  /* Subtle paper-grain texture on body — keeps backgrounds from looking flat */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      radial-gradient(hsl(22 60% 32% / 0.03) 1px, transparent 1px),
+      radial-gradient(hsl(22 60% 32% / 0.02) 1px, transparent 1px);
+    background-size: 24px 24px, 12px 12px;
+    background-position: 0 0, 6px 6px;
+  }
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Mobile-friendly tap targets: minimum 44×44 */
+  button, [role='button'] {
+    min-height: 2.5rem;
+  }
+}
+
+/* Numeric tabular figures for money columns — keeps amounts aligned */
+.tabular-money {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
