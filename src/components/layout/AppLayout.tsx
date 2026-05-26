@@ -8,6 +8,8 @@ import {
   Calendar,
   Bell,
   BarChart3,
+  ScanLine,
+  Printer,
   Settings,
   LogOut,
   Menu,
@@ -31,6 +33,8 @@ const NAV: NavItem[] = [
   { to: '/dues', labelKey: 'nav.dues', icon: Calendar },
   { to: '/reminders', labelKey: 'nav.reminders', icon: Bell },
   { to: '/reports', labelKey: 'nav.reports', icon: BarChart3 },
+  { to: '/import', labelKey: 'nav.import', icon: ScanLine },
+  { to: '/print', labelKey: 'nav.print', icon: Printer },
   { to: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 

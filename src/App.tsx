@@ -18,6 +18,8 @@ import { Dues } from '@/pages/Dues';
 import { Reminders } from '@/pages/Reminders';
 import { Reports } from '@/pages/Reports';
 import { Settings } from '@/pages/Settings';
+import { NotebookImport } from '@/pages/NotebookImport';
+import { NotebookPrint } from '@/pages/NotebookPrint';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -58,6 +60,8 @@ export default function App() {
         <Route path="dues" element={<Dues />} />
         <Route path="reminders" element={<Reminders />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="import" element={<NotebookImport />} />
+        <Route path="print" element={<NotebookPrint />} />
         <Route path="settings" element={<Settings />} />
       </Route>
 

@@ -8,6 +8,8 @@
 
 export type AccountType = 'BC_WEEKLY' | 'MONTHLY_INTEREST';
 export type AccountStatus = 'ACTIVE' | 'CLOSED' | 'DEFAULTED';
+export type BcFrequency = 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY';
+export type AccountSource = 'manual' | 'notebook_import' | 'seed';
 export type CustomerStatus = 'ACTIVE' | 'INACTIVE';
 export type InstallmentStatus = 'PENDING' | 'PAID' | 'PARTIAL' | 'WAIVED';
 export type EffectiveStatus = InstallmentStatus | 'OVERDUE' | 'DUE_TODAY';
@@ -47,6 +49,8 @@ export interface Account {
   total_repayment_amount: number | null;
   profit_amount: number | null;
   term_weeks: number | null;
+  bc_frequency: BcFrequency;
+  source: AccountSource;
   principal_amount: number | null;
   apr: number | null;
   start_date: string;
@@ -120,6 +124,7 @@ export interface UserSettings {
   business_name: string;
   default_currency: string;
   default_bc_term_weeks: number;
+  default_bc_profit_pct: number;
   default_apr: number;
   default_language: Language;
   reminder_template_due: string;

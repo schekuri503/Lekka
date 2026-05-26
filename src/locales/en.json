@@ -11,6 +11,8 @@
     "payments": "Payments",
     "reminders": "Reminders",
     "reports": "Reports",
+    "import": "Import",
+    "print": "Print",
     "settings": "Settings",
     "logout": "Sign out"
   },
@@ -99,6 +101,12 @@
     "amount_given": "Amount given",
     "total_repayment": "Total repayment",
     "term_weeks": "Number of weeks",
+    "term_count": "Number of installments",
+    "frequency": "Frequency",
+    "freq_WEEKLY": "Weekly",
+    "freq_BIWEEKLY": "Every 2 weeks",
+    "freq_MONTHLY": "Monthly",
+    "per_installment": "Per installment",
     "start_date": "Start date",
     "due_weekday": "Due weekday",
     "first_due_date": "First due date",
@@ -177,11 +185,40 @@
     "business_name": "Business name",
     "default_currency": "Default currency",
     "default_bc_weeks": "Default BC term weeks",
+    "default_bc_profit_pct": "Default BC profit %",
     "default_apr": "Default APR %",
     "default_language": "Default language",
     "reminder_time": "Default reminder time",
     "save_success": "Settings saved",
     "import": "Import from notebook",
-    "import_desc": "Upload a photo of a notebook page. We'll try to read it and let you review before saving."
+    "import_desc": "Upload a photo of a notebook page. We'll try to read it and let you review before saving.",
+    "import_cta": "Open import"
+  },
+  "import": {
+    "title": "Notebook import",
+    "subtitle": "Photograph a notebook page, review what we read, then save each customer.",
+    "choose_photo": "Choose photo",
+    "take_photo": "Take photo",
+    "engine": "Engine",
+    "photo_alt": "Notebook page",
+    "scan": "Read text from photo",
+    "reading": "Reading…",
+    "empty": "Upload or take a photo of a notebook page to begin.",
+    "no_candidates": "Couldn't find any customer details. Try a clearer photo or enter manually.",
+    "read_ok": "Page read. Review each entry before saving.",
+    "verify_hint": "OCR is a helper, not a source of truth. Always verify amounts against the original page before saving.",
+    "entry": "Entry",
+    "save_entry": "Save customer + account",
+    "saved": "Customer and account saved",
+    "err_name": "Enter a name.",
+    "err_phone": "Enter a valid 10-digit phone number (starting 6-9).",
+    "err_amount": "Amounts must be between ₹1,000 and ₹1,00,00,000."
+  },
+  "print": {
+    "title": "Print ledger",
+    "subtitle": "A notebook-style page for paper backups. Use your browser's print dialog to save as PDF.",
+    "print": "Print / Save as PDF",
+    "empty": "No active BC accounts to print yet.",
+    "start": "from"
   }
 }

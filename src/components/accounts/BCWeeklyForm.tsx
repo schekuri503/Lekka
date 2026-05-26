@@ -27,6 +27,9 @@ import { useSettings } from '@/hooks/useSettings';
 import { InstallmentPreviewTable } from './InstallmentPreviewTable';
 import { formatMoney, parseMoney } from '@/lib/currency';
 import { todayISO } from '@/lib/utils';
+import type { BcFrequency } from '@/types/database';
+
+const FREQUENCIES: BcFrequency[] = ['WEEKLY', 'BIWEEKLY', 'MONTHLY'];
 
 interface Props {
   /** Preselect a customer (e.g. when opened from CustomerDetail). */
@@ -46,12 +49,30 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
   const [amountGiven, setAmountGiven] = useState('');
   const [totalRepayment, setTotalRepayment] = useState('');
   const [weeks, setWeeks] = useState<number>(settings?.default_bc_term_weeks ?? 10);
+  const [frequency, setFrequency] = useState<BcFrequency>('WEEKLY');
   const [startDate, setStartDate] = useState(todayISO());
   const [notes, setNotes] = useState('');
 
   const given = parseMoney(amountGiven);
   const total = parseMoney(totalRepayment);
   const profit = total - given;
+
+  // Auto-fill the *other* amount from the one being edited, using the
+  // configured profit %. Whichever field the user types in keeps their raw
+  // value (last edit wins); the other is recomputed.
+  const profitPct = settings?.default_bc_profit_pct ?? 11;
+
+  function onGivenChange(value: string) {
+    setAmountGiven(value);
+    const g = parseMoney(value);
+    if (g > 0) setTotalRepayment(String(Math.round(g * (1 + profitPct / 100))));
+  }
+
+  function onTotalChange(value: string) {
+    setTotalRepayment(value);
+    const tot = parseMoney(value);
+    if (tot > 0) setAmountGiven(String(Math.round(tot / (1 + profitPct / 100))));
+  }
 
   const weeklyAmount = useMemo(() => {
     if (!total || !weeks) return 0;
@@ -74,6 +95,7 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
         amount_given: given,
         total_repayment_amount: total,
         term_weeks: weeks,
+        bc_frequency: frequency,
         start_date: startDate,
         notes: notes.trim() || null,
       });
@@ -110,9 +132,9 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
           <Input
             id="amount_given"
             inputMode="decimal"
-            placeholder="45000"
+            placeholder="27000"
             value={amountGiven}
-            onChange={(e) => setAmountGiven(e.target.value)}
+            onChange={(e) => onGivenChange(e.target.value)}
             className="tabular-money"
           />
         </div>
@@ -121,9 +143,9 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
           <Input
             id="total_repayment"
             inputMode="decimal"
-            placeholder="50000"
+            placeholder="30000"
             value={totalRepayment}
-            onChange={(e) => setTotalRepayment(e.target.value)}
+            onChange={(e) => onTotalChange(e.target.value)}
             className="tabular-money"
           />
         </div>
@@ -139,7 +161,7 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
-          <Label htmlFor="weeks">{t('accounts.term_weeks')}</Label>
+          <Label htmlFor="weeks">{t('accounts.term_count')}</Label>
           <Input
             id="weeks"
             type="number"
@@ -149,7 +171,22 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
             onChange={(e) => setWeeks(Math.max(1, Math.min(104, Number(e.target.value) || 1)))}
           />
         </div>
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="frequency">{t('accounts.frequency')}</Label>
+          <Select value={frequency} onValueChange={(v) => setFrequency(v as BcFrequency)}>
+            <SelectTrigger id="frequency">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FREQUENCIES.map((f) => (
+                <SelectItem key={f} value={f}>
+                  {t(`accounts.freq_${f}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
           <Label htmlFor="start_date">{t('accounts.first_due_date')}</Label>
           <Input
             id="start_date"
@@ -161,7 +198,8 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
       </div>
 
       <div className="rounded-md border border-border/60 bg-card px-4 py-2 text-sm text-muted-foreground">
-        Weekly due: <span className="tabular-money font-medium text-foreground">{formatMoney(weeklyAmount)}</span>
+        {t('accounts.per_installment')}:{' '}
+        <span className="tabular-money font-medium text-foreground">{formatMoney(weeklyAmount)}</span>
       </div>
 
       <div className="space-y-1.5">
@@ -174,7 +212,12 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
         />
       </div>
 
-      <InstallmentPreviewTable startDate={startDate} weeks={weeks} totalAmount={total} />
+      <InstallmentPreviewTable
+        startDate={startDate}
+        weeks={weeks}
+        totalAmount={total}
+        frequency={frequency}
+      />
 
       <div className="flex justify-end gap-2">
         <Button type="submit" size="lg" disabled={create.isPending}>
