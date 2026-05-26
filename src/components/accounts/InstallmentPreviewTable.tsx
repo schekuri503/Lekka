@@ -1,18 +1,32 @@
 // ============================================================================
 // InstallmentPreviewTable — shows the schedule before saving an account
 // ============================================================================
-import { addDays, format, parseISO } from 'date-fns';
+import { addDays, addMonths, format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '@/lib/currency';
 import { formatDateShort } from '@/lib/dates';
+import type { BcFrequency } from '@/types/database';
 
 interface Props {
   startDate: string; // YYYY-MM-DD, used as the first due date
   weeks: number;
   totalAmount: number;
+  frequency?: BcFrequency;
 }
 
-export function InstallmentPreviewTable({ startDate, weeks, totalAmount }: Props) {
+/** Due date for installment index i (0-based) given the repayment frequency. */
+function dueDateFor(start: Date, i: number, frequency: BcFrequency): Date {
+  if (frequency === 'BIWEEKLY') return addDays(start, i * 14);
+  if (frequency === 'MONTHLY') return addMonths(start, i);
+  return addDays(start, i * 7);
+}
+
+export function InstallmentPreviewTable({
+  startDate,
+  weeks,
+  totalAmount,
+  frequency = 'WEEKLY',
+}: Props) {
   const { t } = useTranslation();
 
   if (!startDate || !weeks || weeks < 1 || !totalAmount) {
@@ -37,15 +51,17 @@ export function InstallmentPreviewTable({ startDate, weeks, totalAmount }: Props
     const due = isLast ? Math.round((totalAmount - weekly * (weeks - 1)) * 100) / 100 : weekly;
     return {
       n: i + 1,
-      date: format(addDays(parsed, i * 7), 'yyyy-MM-dd'),
+      date: format(dueDateFor(parsed, i, frequency), 'yyyy-MM-dd'),
       amount: due,
     };
   });
 
+  const freqLabel = t(`accounts.freq_${frequency}`);
+
   return (
     <div className="overflow-hidden rounded-lg border border-border/60">
       <div className="border-b border-border/60 bg-muted/30 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {t('accounts.preview')} · {weeks} weeks
+        {t('accounts.preview')} · {weeks} × {freqLabel}
       </div>
       <div className="max-h-64 overflow-auto">
         <table className="w-full text-sm">

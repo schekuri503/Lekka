@@ -2,6 +2,7 @@
 // Settings — business preferences + reminder templates + notebook OCR
 // ============================================================================
 import { useEffect, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Loader2, ScanLine } from 'lucide-react';
 
@@ -18,7 +19,6 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/toast';
 import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
-import { NotebookImport } from '@/components/import/NotebookImport';
 import type { Language } from '@/types/database';
 
 export function Settings() {
@@ -30,6 +30,7 @@ export function Settings() {
   const [businessName, setBusinessName] = useState('');
   const [currency, setCurrency] = useState('INR');
   const [bcWeeks, setBcWeeks] = useState(10);
+  const [bcProfitPct, setBcProfitPct] = useState(11);
   const [apr, setApr] = useState(24);
   const [language, setLanguage] = useState<Language>('en');
   const [templateDue, setTemplateDue] = useState('');
@@ -42,6 +43,7 @@ export function Settings() {
     setBusinessName(settings.business_name ?? '');
     setCurrency(settings.default_currency ?? 'INR');
     setBcWeeks(settings.default_bc_term_weeks ?? 10);
+    setBcProfitPct(settings.default_bc_profit_pct ?? 11);
     setApr(settings.default_apr ?? 24);
     setLanguage((settings.default_language as Language) ?? 'en');
     setTemplateDue(settings.reminder_template_due ?? '');
@@ -56,6 +58,7 @@ export function Settings() {
         business_name: businessName.trim(),
         default_currency: currency,
         default_bc_term_weeks: bcWeeks,
+        default_bc_profit_pct: bcProfitPct,
         default_apr: apr,
         default_language: language,
         reminder_template_due: templateDue,
@@ -117,6 +120,18 @@ export function Settings() {
                 max={104}
                 value={bcWeeks}
                 onChange={(e) => setBcWeeks(Number(e.target.value) || 1)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="bc_profit_pct">{t('settings.default_bc_profit_pct')}</Label>
+              <Input
+                id="bc_profit_pct"
+                type="number"
+                min={0}
+                max={100}
+                step="0.1"
+                value={bcProfitPct}
+                onChange={(e) => setBcProfitPct(Number(e.target.value) || 0)}
               />
             </div>
             <div className="space-y-1.5">
@@ -190,8 +205,8 @@ export function Settings() {
         </div>
       </form>
 
-      {/* OCR section is below the save button — it doesn't write anything to the DB. */}
-      <Card className="space-y-4 p-6">
+      {/* OCR import lives on its own batch-friendly page now. */}
+      <Card className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight">
             <ScanLine className="h-5 w-5 text-primary" />
@@ -199,7 +214,12 @@ export function Settings() {
           </h2>
           <p className="text-sm text-muted-foreground">{t('settings.import_desc')}</p>
         </div>
-        <NotebookImport />
+        <Button asChild variant="outline" className="gap-2 shrink-0">
+          <Link to="/import">
+            <ScanLine className="h-4 w-4" />
+            {t('settings.import_cta')}
+          </Link>
+        </Button>
       </Card>
     </div>
   );

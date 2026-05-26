@@ -6,7 +6,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
-import type { Account } from '@/types/database';
+import type { Account, BcFrequency, AccountSource } from '@/types/database';
 
 export function useAccounts(customerId?: string) {
   const { user } = useAuth();
@@ -28,9 +28,11 @@ interface BCInput {
   amount_given: number;
   total_repayment_amount: number;
   term_weeks: number;
+  bc_frequency: BcFrequency;
   start_date: string; // YYYY-MM-DD — this is treated as the first installment due date
   due_day?: string | null;
   notes?: string | null;
+  source?: AccountSource;
 }
 
 interface MonthlyInput {
