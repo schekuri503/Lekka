@@ -7,7 +7,7 @@
 // ============================================================================
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -37,9 +37,10 @@ interface Props {
   candidate: OcrCandidate;
   imageSrc: string;
   index: number;
+  onDismiss?: () => void;
 }
 
-export function OcrReviewForm({ candidate, imageSrc, index }: Props) {
+export function OcrReviewForm({ candidate, imageSrc, index, onDismiss }: Props) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { data: settings } = useSettings();
@@ -112,8 +113,20 @@ export function OcrReviewForm({ candidate, imageSrc, index }: Props) {
 
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-border/60 bg-muted/30 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {t('import.entry')} {index + 1}
+      <div className="flex items-center justify-between border-b border-border/60 bg-muted/30 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <span>
+          {t('import.entry')} {index + 1}
+        </span>
+        {onDismiss && !saved && (
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-accent hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+            {t('import.dismiss')}
+          </button>
+        )}
       </div>
       <div className="grid gap-4 p-4 md:grid-cols-2">
         <div className="space-y-2">

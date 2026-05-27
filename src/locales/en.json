@@ -209,6 +209,8 @@
     "read_ok": "Page read. Review each entry before saving.",
     "verify_hint": "OCR is a helper, not a source of truth. Always verify amounts against the original page before saving.",
     "entry": "Entry",
+    "dismiss": "Dismiss",
+    "scan_another": "Scan another page",
     "save_entry": "Save customer + account",
     "saved": "Customer and account saved",
     "err_name": "Enter a name.",

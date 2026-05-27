@@ -7,7 +7,7 @@
 // ============================================================================
 import { useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, Loader2, ScanLine, Sparkles, Upload } from 'lucide-react';
+import { Camera, Loader2, RotateCcw, ScanLine, Sparkles, Upload, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -29,6 +29,13 @@ export function NotebookImport() {
 
   const visionKey = hasVisionKey();
 
+  function reset() {
+    setFile(null);
+    setPreview(null);
+    setCandidates([]);
+    setProgress(0);
+  }
+
   function onPick(e: ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
     setFile(f);
@@ -40,6 +47,12 @@ export function NotebookImport() {
     } else {
       setPreview(null);
     }
+    // Allow re-picking the same file later (browsers skip onChange otherwise).
+    e.target.value = '';
+  }
+
+  function dismissCandidate(index: number) {
+    setCandidates((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function onScan() {
@@ -112,7 +125,7 @@ export function NotebookImport() {
         <p className="text-xs text-muted-foreground">{t('import.tip')}</p>
 
         {preview ? (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <img
               src={preview}
               alt={t('import.photo_alt')}
@@ -126,6 +139,10 @@ export function NotebookImport() {
                   : t('import.reading')
                 : t('import.scan')}
             </Button>
+            <Button onClick={reset} variant="ghost" disabled={busy} className="gap-2 text-muted-foreground">
+              <X className="h-4 w-4" />
+              {t('common.cancel')}
+            </Button>
           </div>
         ) : (
           <div className="grid place-items-center gap-2 rounded-md border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
@@ -136,11 +153,23 @@ export function NotebookImport() {
       </Card>
 
       {candidates.map((c, i) => (
-        <OcrReviewForm key={i} candidate={c} imageSrc={preview ?? ''} index={i} />
+        <OcrReviewForm
+          key={i}
+          candidate={c}
+          imageSrc={preview ?? ''}
+          index={i}
+          onDismiss={() => dismissCandidate(i)}
+        />
       ))}
 
-      {preview && candidates.length > 0 && (
-        <p className="text-center text-xs text-muted-foreground">{t('import.verify_hint')}</p>
+      {candidates.length > 0 && (
+        <div className="space-y-3 text-center">
+          <p className="text-xs text-muted-foreground">{t('import.verify_hint')}</p>
+          <Button onClick={reset} variant="outline" className="gap-2">
+            <RotateCcw className="h-4 w-4" />
+            {t('import.scan_another')}
+          </Button>
+        </div>
       )}
     </div>
   );
