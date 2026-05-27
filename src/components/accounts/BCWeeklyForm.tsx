@@ -26,7 +26,7 @@ import { useCreateBCAccount } from '@/hooks/useAccounts';
 import { useSettings } from '@/hooks/useSettings';
 import { InstallmentPreviewTable } from './InstallmentPreviewTable';
 import { formatMoney, parseMoney } from '@/lib/currency';
-import { todayISO } from '@/lib/utils';
+import { getErrorMessage, todayISO } from '@/lib/utils';
 import type { BcFrequency } from '@/types/database';
 
 const FREQUENCIES: BcFrequency[] = ['WEEKLY', 'BIWEEKLY', 'MONTHLY'];
@@ -103,8 +103,7 @@ export function BCWeeklyForm({ defaultCustomerId, onCreated }: Props) {
       if (onCreated) onCreated(acct.id);
       else navigate(`/customers/${acct.customer_id}`);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Save failed';
-      toast(msg, 'error');
+      toast(getErrorMessage(err, 'Save failed'), 'error');
     }
   }
 

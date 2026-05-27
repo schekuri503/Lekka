@@ -43,3 +43,21 @@ export function normalizePhone(input: string): string {
   if (digits.length === 10) return '+91' + digits; // assume Indian if 10-digit
   return digits;
 }
+
+/**
+ * Best-effort human-readable message from any thrown value. Handles Error
+ * instances, plain strings, and Supabase/PostgREST error objects (which are
+ * not Error instances but carry message/details/hint/code).
+ */
+export function getErrorMessage(err: unknown, fallback = 'Something went wrong'): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  if (err && typeof err === 'object') {
+    const e = err as { message?: unknown; details?: unknown; hint?: unknown };
+    const parts = [e.message, e.details, e.hint].filter(
+      (p): p is string => typeof p === 'string' && p.length > 0,
+    );
+    if (parts.length) return parts.join(' — ');
+  }
+  return fallback;
+}
