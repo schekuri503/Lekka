@@ -25,7 +25,7 @@ import { useCreateCustomer } from '@/hooks/useCustomers';
 import { useCreateBCAccount } from '@/hooks/useAccounts';
 import { useSettings } from '@/hooks/useSettings';
 import { formatMoney, parseMoney } from '@/lib/currency';
-import { todayISO } from '@/lib/utils';
+import { getErrorMessage, todayISO } from '@/lib/utils';
 import type { BcFrequency } from '@/types/database';
 import type { OcrCandidate } from '@/lib/ocr-parse';
 
@@ -105,7 +105,7 @@ export function OcrReviewForm({ candidate, imageSrc, index, onDismiss }: Props) 
       setSaved(true);
       toast(t('import.saved'), 'success');
     } catch (err: unknown) {
-      toast(err instanceof Error ? err.message : 'Save failed', 'error');
+      toast(getErrorMessage(err, 'Save failed'), 'error');
     }
   }
 
