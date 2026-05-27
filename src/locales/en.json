@@ -202,6 +202,7 @@
     "engine": "Engine",
     "photo_alt": "Notebook page",
     "scan": "Read text from photo",
+    "tip": "Hold the page upright (not sideways) with good light. For handwritten Telugu, use the Google Vision engine — Tesseract works best on neat printed text.",
     "reading": "Reading…",
     "empty": "Upload or take a photo of a notebook page to begin.",
     "no_candidates": "Couldn't find any customer details. Try a clearer photo or enter manually.",
