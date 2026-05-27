@@ -7,7 +7,7 @@
 // ============================================================================
 import { useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, Loader2, RotateCcw, ScanLine, Sparkles, Upload, X } from 'lucide-react';
+import { Camera, Info, Loader2, Pencil, RotateCcw, ScanLine, Sparkles, Upload, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -55,6 +55,13 @@ export function NotebookImport() {
     setCandidates((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function addBlankEntry() {
+    setCandidates((prev) => [
+      ...prev,
+      { name: '', name_te: '', phone: '', amount: 0, start_date: '', raw: '' },
+    ]);
+  }
+
   async function onScan() {
     if (!file) return;
     setBusy(true);
@@ -81,6 +88,13 @@ export function NotebookImport() {
         </h1>
         <p className="text-sm text-muted-foreground">{t('import.subtitle')}</p>
       </header>
+
+      {!visionKey && (
+        <div className="flex items-start gap-2 rounded-md border border-secondary/40 bg-secondary/5 px-4 py-3 text-sm text-muted-foreground">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+          <p>{t('import.no_vision_key')}</p>
+        </div>
+      )}
 
       <Card className="space-y-4 p-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -138,6 +152,10 @@ export function NotebookImport() {
                   ? `${t('import.reading')} ${progress}%`
                   : t('import.reading')
                 : t('import.scan')}
+            </Button>
+            <Button onClick={addBlankEntry} variant="outline" disabled={busy} className="gap-2">
+              <Pencil className="h-4 w-4" />
+              {t('import.add_manual')}
             </Button>
             <Button onClick={reset} variant="ghost" disabled={busy} className="gap-2 text-muted-foreground">
               <X className="h-4 w-4" />

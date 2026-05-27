@@ -203,6 +203,8 @@
     "photo_alt": "Notebook page",
     "scan": "Read text from photo",
     "tip": "Hold the page upright (not sideways) with good light. For handwritten Telugu, use the Google Vision engine — Tesseract works best on neat printed text.",
+    "no_vision_key": "Handwriting reads best with Google Vision (free: 1,000 pages/month). Add VITE_GOOGLE_VISION_API_KEY in your environment to enable it. Until then, scanning uses Tesseract, which struggles with cursive — you can also type entries manually using the photo as reference.",
+    "add_manual": "Add entry manually",
     "reading": "Reading…",
     "empty": "Upload or take a photo of a notebook page to begin.",
     "no_candidates": "Couldn't find any customer details. Try a clearer photo or enter manually.",
