@@ -90,7 +90,10 @@
     "address": "Address / village",
     "no_results": "No customers found.",
     "added": "Customer added",
-    "updated": "Customer updated"
+    "updated": "Customer updated",
+    "deleted": "Customer deleted",
+    "delete_title": "Delete customer?",
+    "delete_confirm": "This permanently deletes {{name}} along with their {{count}} account(s), all installments and payment records. This cannot be undone."
   },
   "accounts": {
     "title": "New account",
@@ -117,7 +120,10 @@
     "monthly_due_day": "Day of month",
     "preview": "Installment preview",
     "create": "Create account",
-    "created": "Account created"
+    "created": "Account created",
+    "deleted": "Account deleted",
+    "delete_title": "Delete account?",
+    "delete_confirm": "This permanently deletes the account, its installments and any payment records. This cannot be undone."
   },
   "dues": {
     "title": "Dues",

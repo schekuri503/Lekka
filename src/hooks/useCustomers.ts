@@ -70,6 +70,23 @@ export function useCreateCustomer() {
   });
 }
 
+export function useDeleteCustomer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (customerId: string) => {
+      const { error } = await supabase.rpc('delete_customer', { p_customer_id: customerId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEY });
+      qc.invalidateQueries({ queryKey: ['accounts'] });
+      qc.invalidateQueries({ queryKey: ['installments'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['dues'] });
+    },
+  });
+}
+
 export function useUpdateCustomer() {
   const qc = useQueryClient();
   return useMutation({

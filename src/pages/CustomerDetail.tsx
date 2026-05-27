@@ -2,37 +2,68 @@
 // CustomerDetail — full profile + active/closed accounts + installment history
 // ============================================================================
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Phone, MapPin, Plus, Calendar, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Phone, MapPin, Plus, Calendar, TrendingUp, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/toast';
 import { StatusBadge } from '@/components/shared/StatusBadge';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { WhatsAppReminderButton } from '@/components/reminders/WhatsAppReminderButton';
 import { InstallmentList } from '@/components/dashboard/InstallmentList';
 import { PaymentModal } from '@/components/payments/PaymentModal';
-import { useCustomer } from '@/hooks/useCustomers';
-import { useAccounts } from '@/hooks/useAccounts';
+import { useCustomer, useDeleteCustomer } from '@/hooks/useCustomers';
+import { useAccounts, useDeleteAccount } from '@/hooks/useAccounts';
 import { useInstallments } from '@/hooks/useDashboard';
 import { formatMoney } from '@/lib/currency';
 import { formatDate } from '@/lib/dates';
-import type { InstallmentWithStatus } from '@/types/database';
+import { getErrorMessage } from '@/lib/utils';
+import type { Account, InstallmentWithStatus } from '@/types/database';
 
 export function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { data: customer, isLoading } = useCustomer(id);
   const { data: accounts } = useAccounts(id);
   const { data: installments } = useInstallments({ customerId: id });
+  const deleteCustomer = useDeleteCustomer();
+  const deleteAccount = useDeleteAccount();
 
   const [selected, setSelected] = useState<InstallmentWithStatus | null>(null);
   const [payOpen, setPayOpen] = useState(false);
+  const [confirmCustomerDelete, setConfirmCustomerDelete] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
 
   function startPay(row: InstallmentWithStatus) {
     setSelected(row);
     setPayOpen(true);
+  }
+
+  async function onDeleteCustomer() {
+    if (!customer) return;
+    try {
+      await deleteCustomer.mutateAsync(customer.id);
+      toast(t('customers.deleted'), 'success');
+      navigate('/customers');
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Delete failed'), 'error');
+    }
+  }
+
+  async function onDeleteAccount() {
+    if (!accountToDelete) return;
+    try {
+      await deleteAccount.mutateAsync(accountToDelete.id);
+      toast(t('accounts.deleted'), 'success');
+      setAccountToDelete(null);
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Delete failed'), 'error');
+    }
   }
 
   if (isLoading) {
@@ -123,6 +154,15 @@ export function CustomerDetail() {
                   kind="due"
                 />
               )}
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-destructive hover:bg-destructive/10"
+                onClick={() => setConfirmCustomerDelete(true)}
+              >
+                <Trash2 className="mr-1.5 h-4 w-4" />
+                {t('common.delete')}
+              </Button>
             </div>
           </div>
         </div>
@@ -181,7 +221,7 @@ export function CustomerDetail() {
                     Started {formatDate(a.start_date)}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-6 sm:text-right">
+                <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:gap-6 sm:text-right">
                   {a.account_type === 'BC_WEEKLY' ? (
                     <>
                       <div>
@@ -213,6 +253,15 @@ export function CustomerDetail() {
                       </div>
                     </>
                   )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="col-span-2 justify-self-end text-destructive hover:bg-destructive/10 sm:col-auto"
+                    aria-label={t('common.delete')}
+                    onClick={() => setAccountToDelete(a)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </Card>
             ))
@@ -248,6 +297,31 @@ export function CustomerDetail() {
       </Tabs>
 
       <PaymentModal open={payOpen} onOpenChange={setPayOpen} installment={selected} />
+
+      <ConfirmDialog
+        open={confirmCustomerDelete}
+        onOpenChange={setConfirmCustomerDelete}
+        title={t('customers.delete_title')}
+        description={t('customers.delete_confirm', {
+          name: customer.full_name,
+          count: accounts?.length ?? 0,
+        })}
+        confirmLabel={t('common.delete')}
+        destructive
+        pending={deleteCustomer.isPending}
+        onConfirm={onDeleteCustomer}
+      />
+
+      <ConfirmDialog
+        open={!!accountToDelete}
+        onOpenChange={(o) => !o && setAccountToDelete(null)}
+        title={t('accounts.delete_title')}
+        description={t('accounts.delete_confirm')}
+        confirmLabel={t('common.delete')}
+        destructive
+        pending={deleteAccount.isPending}
+        onConfirm={onDeleteAccount}
+      />
     </div>
   );
 }

@@ -70,6 +70,22 @@ export function useCreateBCAccount() {
   });
 }
 
+export function useDeleteAccount() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      const { error } = await supabase.rpc('delete_account', { p_account_id: accountId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['accounts'] });
+      qc.invalidateQueries({ queryKey: ['installments'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['dues'] });
+    },
+  });
+}
+
 export function useCreateMonthlyAccount() {
   const qc = useQueryClient();
   const { user } = useAuth();
