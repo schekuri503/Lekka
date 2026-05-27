@@ -102,14 +102,28 @@ function pickPhone(block: string): string {
 }
 
 function pickAmount(block: string): number {
-  let best = 0;
-  // Grab number-like tokens (allow Indian grouping) and keep the largest in range.
-  const tokens = block.match(/\d[\d,]{2,}/g) ?? [];
-  for (const tok of tokens) {
-    const n = Number(tok.replace(/,/g, ''));
-    if (Number.isFinite(n) && n >= MIN_AMOUNT && n <= MAX_AMOUNT && n > best) best = n;
+  // "Strong" candidates are written like money: Indian comma grouping (30,000)
+  // or a trailing money marker (/-, ), |, —). "Weak" candidates are bare runs
+  // of digits, which on these pages are usually years or day/month numbers.
+  const strong: number[] = [];
+  const weak: number[] = [];
+  // number (optional Indian grouping) followed by an optional money marker
+  const re = /(\d{1,3}(?:,\d{2,3})+|\d+)\s*(\/-|\/|\)|\||—|–)?/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(block)) !== null) {
+    const raw = m[1]!;
+    const hasComma = raw.includes(',');
+    const hasMarker = !!m[2];
+    const n = Number(raw.replace(/,/g, ''));
+    if (!Number.isFinite(n) || n < MIN_AMOUNT || n > MAX_AMOUNT) continue;
+    if (hasComma || hasMarker) strong.push(n);
+    else weak.push(n);
   }
-  return best;
+  if (strong.length) return Math.max(...strong);
+  // Among bare numbers, skip anything that looks like a year before falling back.
+  const notYears = weak.filter((n) => !(n >= 1900 && n <= 2099));
+  if (notYears.length) return Math.max(...notYears);
+  return weak.length ? Math.max(...weak) : 0;
 }
 
 function pickDate(block: string): string {

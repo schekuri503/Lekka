@@ -109,6 +109,8 @@ export function NotebookImport() {
           </div>
         </div>
 
+        <p className="text-xs text-muted-foreground">{t('import.tip')}</p>
+
         {preview ? (
           <div className="flex items-center gap-3">
             <img
