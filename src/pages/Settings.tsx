@@ -35,6 +35,7 @@ export function Settings() {
   const [language, setLanguage] = useState<Language>('en');
   const [templateDue, setTemplateDue] = useState('');
   const [templateLate, setTemplateLate] = useState('');
+  const [templateReference, setTemplateReference] = useState('');
   const [reminderTime, setReminderTime] = useState('10:00');
 
   // Hydrate form from settings once they arrive.
@@ -48,6 +49,7 @@ export function Settings() {
     setLanguage((settings.default_language as Language) ?? 'en');
     setTemplateDue(settings.reminder_template_due ?? '');
     setTemplateLate(settings.reminder_template_late ?? '');
+    setTemplateReference(settings.reminder_template_reference ?? '');
     setReminderTime(settings.reminder_time_hhmm ?? '10:00');
   }, [settings]);
 
@@ -63,6 +65,7 @@ export function Settings() {
         default_language: language,
         reminder_template_due: templateDue,
         reminder_template_late: templateLate,
+        reminder_template_reference: templateReference,
         reminder_time_hhmm: reminderTime,
       });
       // Switch the live UI language to match the new default.
@@ -194,6 +197,16 @@ export function Settings() {
               value={templateLate}
               onChange={(e) => setTemplateLate(e.target.value)}
             />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="tpl_ref">{t('settings.reminder_template_reference')}</Label>
+            <Textarea
+              id="tpl_ref"
+              rows={3}
+              value={templateReference}
+              onChange={(e) => setTemplateReference(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">{t('reminders.reference_hint')}</p>
           </div>
         </Card>
 

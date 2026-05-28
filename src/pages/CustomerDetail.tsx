@@ -4,14 +4,23 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Phone, MapPin, Plus, Calendar, TrendingUp, Trash2 } from 'lucide-react';
+import { ArrowLeft, Phone, MapPin, Plus, Calendar, TrendingUp, Trash2, Pencil, Users } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/toast';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { CustomerForm } from '@/components/customers/CustomerForm';
+import { AccountEditDialog } from '@/components/accounts/AccountEditDialog';
 import { WhatsAppReminderButton } from '@/components/reminders/WhatsAppReminderButton';
 import { InstallmentList } from '@/components/dashboard/InstallmentList';
 import { PaymentModal } from '@/components/payments/PaymentModal';
@@ -38,6 +47,8 @@ export function CustomerDetail() {
   const [payOpen, setPayOpen] = useState(false);
   const [confirmCustomerDelete, setConfirmCustomerDelete] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
+  const [editCustomerOpen, setEditCustomerOpen] = useState(false);
+  const [accountToEdit, setAccountToEdit] = useState<Account | null>(null);
 
   function startPay(row: InstallmentWithStatus) {
     setSelected(row);
@@ -85,6 +96,19 @@ export function CustomerDetail() {
   // Sum balances for a "total outstanding for this customer" callout
   const totalOutstanding = open.reduce((s, r) => s + Number(r.balance ?? 0), 0);
 
+  const references = [
+    {
+      name: customer.reference1_name,
+      phone: customer.reference1_phone,
+      relation: customer.reference1_relation,
+    },
+    {
+      name: customer.reference2_name,
+      phone: customer.reference2_phone,
+      relation: customer.reference2_relation,
+    },
+  ].filter((r) => r.name || r.phone);
+
   return (
     <div className="space-y-6">
       <Link
@@ -116,6 +140,12 @@ export function CustomerDetail() {
                   <Phone className="h-3.5 w-3.5" />
                   {customer.phone_number}
                 </span>
+                {customer.phone_number_2 && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5" />
+                    {customer.phone_number_2}
+                  </span>
+                )}
                 {customer.address && (
                   <span className="inline-flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5" />
@@ -125,6 +155,35 @@ export function CustomerDetail() {
               </div>
               {customer.notes && (
                 <p className="mt-2 text-sm text-muted-foreground">{customer.notes}</p>
+              )}
+
+              {references.length > 0 && (
+                <div className="mt-3 space-y-1.5">
+                  <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    {t('customers.references')}
+                  </p>
+                  {references.map((r, i) => (
+                    <div key={i} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                      <span className="font-medium">{r.name || '—'}</span>
+                      {r.relation && (
+                        <span className="text-xs text-muted-foreground">· {r.relation}</span>
+                      )}
+                      {r.phone && <span className="text-muted-foreground">· {r.phone}</span>}
+                      {r.phone && (
+                        <WhatsAppReminderButton
+                          phone={r.phone}
+                          referenceName={r.name || ''}
+                          customerName={customer.full_name}
+                          amount={totalOutstanding}
+                          dueDate={open[0]?.due_date ?? ''}
+                          kind="late"
+                          label={t('reminders.message_reference')}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -154,6 +213,10 @@ export function CustomerDetail() {
                   kind="due"
                 />
               )}
+              <Button size="sm" variant="outline" onClick={() => setEditCustomerOpen(true)}>
+                <Pencil className="mr-1.5 h-4 w-4" />
+                {t('common.edit')}
+              </Button>
               <Button
                 size="sm"
                 variant="outline"
@@ -321,6 +384,25 @@ export function CustomerDetail() {
         destructive
         pending={deleteAccount.isPending}
         onConfirm={onDeleteAccount}
+      />
+
+      <Dialog open={editCustomerOpen} onOpenChange={setEditCustomerOpen}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('customers.edit')}</DialogTitle>
+            <DialogDescription>{customer.full_name}</DialogDescription>
+          </DialogHeader>
+          <CustomerForm
+            customer={customer}
+            onDone={() => setEditCustomerOpen(false)}
+            onCancel={() => setEditCustomerOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <AccountEditDialog
+        account={accountToEdit}
+        onOpenChange={(o) => !o && setAccountToEdit(null)}
       />
     </div>
   );
