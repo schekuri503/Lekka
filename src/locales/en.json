@@ -213,7 +213,14 @@
     "save_success": "Settings saved",
     "import": "Import from notebook",
     "import_desc": "Upload a photo of a notebook page. We'll try to read it and let you review before saving.",
-    "import_cta": "Open import"
+    "import_cta": "Open import",
+    "backup": "Backup / export",
+    "backup_desc": "Download your data as CSV files to keep offline copies. Open them in Excel or Google Sheets.",
+    "backup_empty": "Nothing to export yet.",
+    "backup_customers": "Customers",
+    "backup_accounts": "Accounts",
+    "backup_installments": "Installments",
+    "backup_payments": "Payments"
   },
   "import": {
     "title": "Notebook import",

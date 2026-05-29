@@ -4,7 +4,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Loader2, ScanLine } from 'lucide-react';
+import { Download, Loader2, ScanLine } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -19,7 +19,12 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/toast';
 import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
+import { supabase } from '@/lib/supabase';
+import { toCsv, downloadText } from '@/lib/csv';
+import { todayISO, getErrorMessage } from '@/lib/utils';
 import type { Language } from '@/types/database';
+
+const BACKUP_TABLES = ['customers', 'accounts', 'installments', 'payments'] as const;
 
 export function Settings() {
   const { t, i18n } = useTranslation();
@@ -37,6 +42,25 @@ export function Settings() {
   const [templateLate, setTemplateLate] = useState('');
   const [templateReference, setTemplateReference] = useState('');
   const [reminderTime, setReminderTime] = useState('10:00');
+  const [exporting, setExporting] = useState<string | null>(null);
+
+  async function exportTable(table: (typeof BACKUP_TABLES)[number]) {
+    setExporting(table);
+    try {
+      const { data, error } = await supabase.from(table).select('*');
+      if (error) throw error;
+      const rows = (data ?? []) as Record<string, unknown>[];
+      if (rows.length === 0) {
+        toast(t('settings.backup_empty'), 'info');
+        return;
+      }
+      downloadText(`lekka-${table}-${todayISO()}.csv`, toCsv(rows));
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Export failed'), 'error');
+    } finally {
+      setExporting(null);
+    }
+  }
 
   // Hydrate form from settings once they arrive.
   useEffect(() => {
@@ -233,6 +257,35 @@ export function Settings() {
             {t('settings.import_cta')}
           </Link>
         </Button>
+      </Card>
+
+      <Card className="space-y-4 p-6">
+        <div>
+          <h2 className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight">
+            <Download className="h-5 w-5 text-primary" />
+            {t('settings.backup')}
+          </h2>
+          <p className="text-sm text-muted-foreground">{t('settings.backup_desc')}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {BACKUP_TABLES.map((table) => (
+            <Button
+              key={table}
+              type="button"
+              variant="outline"
+              className="gap-2"
+              disabled={!!exporting}
+              onClick={() => exportTable(table)}
+            >
+              {exporting === table ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {t(`settings.backup_${table}`)}
+            </Button>
+          ))}
+        </div>
       </Card>
     </div>
   );
