@@ -220,7 +220,8 @@
     "backup_customers": "Customers",
     "backup_accounts": "Accounts",
     "backup_installments": "Installments",
-    "backup_payments": "Payments"
+    "backup_payments": "Payments",
+    "backup_all": "Download all"
   },
   "import": {
     "title": "Notebook import",

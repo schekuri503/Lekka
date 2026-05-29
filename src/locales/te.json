@@ -220,7 +220,8 @@
     "backup_customers": "వినియోగదారులు",
     "backup_accounts": "ఖాతాలు",
     "backup_installments": "వాయిదాలు",
-    "backup_payments": "చెల్లింపులు"
+    "backup_payments": "చెల్లింపులు",
+    "backup_all": "అన్నీ డౌన్‌లోడ్ చేయండి"
   },
   "import": {
     "title": "నోట్‌బుక్ దిగుమతి",

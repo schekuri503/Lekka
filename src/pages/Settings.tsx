@@ -44,17 +44,38 @@ export function Settings() {
   const [reminderTime, setReminderTime] = useState('10:00');
   const [exporting, setExporting] = useState<string | null>(null);
 
+  async function fetchAndDownload(table: (typeof BACKUP_TABLES)[number]): Promise<boolean> {
+    const { data, error } = await supabase.from(table).select('*');
+    if (error) throw error;
+    const rows = (data ?? []) as Record<string, unknown>[];
+    if (rows.length === 0) return false;
+    downloadText(`lekka-${table}-${todayISO()}.csv`, toCsv(rows));
+    return true;
+  }
+
   async function exportTable(table: (typeof BACKUP_TABLES)[number]) {
     setExporting(table);
     try {
-      const { data, error } = await supabase.from(table).select('*');
-      if (error) throw error;
-      const rows = (data ?? []) as Record<string, unknown>[];
-      if (rows.length === 0) {
-        toast(t('settings.backup_empty'), 'info');
-        return;
+      const had = await fetchAndDownload(table);
+      if (!had) toast(t('settings.backup_empty'), 'info');
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Export failed'), 'error');
+    } finally {
+      setExporting(null);
+    }
+  }
+
+  async function exportAll() {
+    setExporting('all');
+    try {
+      let any = false;
+      for (const table of BACKUP_TABLES) {
+        const had = await fetchAndDownload(table);
+        any = any || had;
+        // Small gap so the browser doesn't drop back-to-back downloads.
+        await new Promise((r) => setTimeout(r, 400));
       }
-      downloadText(`lekka-${table}-${todayISO()}.csv`, toCsv(rows));
+      if (!any) toast(t('settings.backup_empty'), 'info');
     } catch (err: unknown) {
       toast(getErrorMessage(err, 'Export failed'), 'error');
     } finally {
@@ -285,6 +306,19 @@ export function Settings() {
               {t(`settings.backup_${table}`)}
             </Button>
           ))}
+          <Button
+            type="button"
+            className="gap-2"
+            disabled={!!exporting}
+            onClick={exportAll}
+          >
+            {exporting === 'all' ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {t('settings.backup_all')}
+          </Button>
         </div>
       </Card>
     </div>
