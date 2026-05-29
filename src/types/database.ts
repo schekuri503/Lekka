@@ -31,8 +31,16 @@ export interface Customer {
   full_name: string;
   full_name_te: string | null;
   phone_number: string;
+  phone_number_2: string | null;
+  reference1_name: string | null;
+  reference1_phone: string | null;
+  reference1_relation: string | null;
+  reference2_name: string | null;
+  reference2_phone: string | null;
+  reference2_relation: string | null;
   address: string | null;
   notes: string | null;
+  notebook_ref: string | null;
   photo_url: string | null;
   status: CustomerStatus;
   created_at: string;
@@ -129,6 +137,7 @@ export interface UserSettings {
   default_language: Language;
   reminder_template_due: string;
   reminder_template_late: string;
+  reminder_template_reference: string;
   reminder_time_hhmm: string;
   created_at: string;
   updated_at: string;

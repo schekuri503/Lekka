@@ -6,7 +6,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
-import type { Account, BcFrequency, AccountSource } from '@/types/database';
+import type { Account, AccountStatus, BcFrequency, AccountSource } from '@/types/database';
 
 export function useAccounts(customerId?: string) {
   const { user } = useAuth();
@@ -66,6 +66,44 @@ export function useCreateBCAccount() {
       qc.invalidateQueries({ queryKey: ['accounts'] });
       qc.invalidateQueries({ queryKey: ['installments'] });
       qc.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+}
+
+interface AccountEditInput {
+  id: string;
+  status?: AccountStatus;
+  start_date?: string;
+  due_day?: string | null;
+  notes?: string | null;
+}
+
+// Safe-field updates only. Amounts/term are intentionally excluded because
+// installments + payments are derived from them at insert time.
+export function useUpdateAccount() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: AccountEditInput) => {
+      const next: Record<string, unknown> = { ...patch };
+      if (patch.status === 'CLOSED' || patch.status === 'DEFAULTED') {
+        next.closed_at = new Date().toISOString();
+      } else if (patch.status === 'ACTIVE') {
+        next.closed_at = null;
+      }
+      const { data, error } = await supabase
+        .from('accounts')
+        .update(next)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Account;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['accounts'] });
+      qc.invalidateQueries({ queryKey: ['installments'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['dues'] });
     },
   });
 }

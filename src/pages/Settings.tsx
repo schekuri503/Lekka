@@ -4,7 +4,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Loader2, ScanLine } from 'lucide-react';
+import { Download, Loader2, ScanLine } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -19,7 +19,12 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/toast';
 import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
+import { supabase } from '@/lib/supabase';
+import { toCsv, downloadText } from '@/lib/csv';
+import { todayISO, getErrorMessage } from '@/lib/utils';
 import type { Language } from '@/types/database';
+
+const BACKUP_TABLES = ['customers', 'accounts', 'installments', 'payments'] as const;
 
 export function Settings() {
   const { t, i18n } = useTranslation();
@@ -35,7 +40,48 @@ export function Settings() {
   const [language, setLanguage] = useState<Language>('en');
   const [templateDue, setTemplateDue] = useState('');
   const [templateLate, setTemplateLate] = useState('');
+  const [templateReference, setTemplateReference] = useState('');
   const [reminderTime, setReminderTime] = useState('10:00');
+  const [exporting, setExporting] = useState<string | null>(null);
+
+  async function fetchAndDownload(table: (typeof BACKUP_TABLES)[number]): Promise<boolean> {
+    const { data, error } = await supabase.from(table).select('*');
+    if (error) throw error;
+    const rows = (data ?? []) as Record<string, unknown>[];
+    if (rows.length === 0) return false;
+    downloadText(`lekka-${table}-${todayISO()}.csv`, toCsv(rows));
+    return true;
+  }
+
+  async function exportTable(table: (typeof BACKUP_TABLES)[number]) {
+    setExporting(table);
+    try {
+      const had = await fetchAndDownload(table);
+      if (!had) toast(t('settings.backup_empty'), 'info');
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Export failed'), 'error');
+    } finally {
+      setExporting(null);
+    }
+  }
+
+  async function exportAll() {
+    setExporting('all');
+    try {
+      let any = false;
+      for (const table of BACKUP_TABLES) {
+        const had = await fetchAndDownload(table);
+        any = any || had;
+        // Small gap so the browser doesn't drop back-to-back downloads.
+        await new Promise((r) => setTimeout(r, 400));
+      }
+      if (!any) toast(t('settings.backup_empty'), 'info');
+    } catch (err: unknown) {
+      toast(getErrorMessage(err, 'Export failed'), 'error');
+    } finally {
+      setExporting(null);
+    }
+  }
 
   // Hydrate form from settings once they arrive.
   useEffect(() => {
@@ -48,6 +94,7 @@ export function Settings() {
     setLanguage((settings.default_language as Language) ?? 'en');
     setTemplateDue(settings.reminder_template_due ?? '');
     setTemplateLate(settings.reminder_template_late ?? '');
+    setTemplateReference(settings.reminder_template_reference ?? '');
     setReminderTime(settings.reminder_time_hhmm ?? '10:00');
   }, [settings]);
 
@@ -63,6 +110,7 @@ export function Settings() {
         default_language: language,
         reminder_template_due: templateDue,
         reminder_template_late: templateLate,
+        reminder_template_reference: templateReference,
         reminder_time_hhmm: reminderTime,
       });
       // Switch the live UI language to match the new default.
@@ -195,6 +243,16 @@ export function Settings() {
               onChange={(e) => setTemplateLate(e.target.value)}
             />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="tpl_ref">{t('settings.reminder_template_reference')}</Label>
+            <Textarea
+              id="tpl_ref"
+              rows={3}
+              value={templateReference}
+              onChange={(e) => setTemplateReference(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">{t('reminders.reference_hint')}</p>
+          </div>
         </Card>
 
         <div className="flex justify-end">
@@ -220,6 +278,48 @@ export function Settings() {
             {t('settings.import_cta')}
           </Link>
         </Button>
+      </Card>
+
+      <Card className="space-y-4 p-6">
+        <div>
+          <h2 className="flex items-center gap-2 font-display text-lg font-semibold tracking-tight">
+            <Download className="h-5 w-5 text-primary" />
+            {t('settings.backup')}
+          </h2>
+          <p className="text-sm text-muted-foreground">{t('settings.backup_desc')}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {BACKUP_TABLES.map((table) => (
+            <Button
+              key={table}
+              type="button"
+              variant="outline"
+              className="gap-2"
+              disabled={!!exporting}
+              onClick={() => exportTable(table)}
+            >
+              {exporting === table ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {t(`settings.backup_${table}`)}
+            </Button>
+          ))}
+          <Button
+            type="button"
+            className="gap-2"
+            disabled={!!exporting}
+            onClick={exportAll}
+          >
+            {exporting === 'all' ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {t('settings.backup_all')}
+          </Button>
+        </div>
       </Card>
     </div>
   );

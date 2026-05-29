@@ -46,7 +46,7 @@ export function Customers() {
               {t('customers.add')}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t('customers.add')}</DialogTitle>
               <DialogDescription>{t('customers.title')}</DialogDescription>

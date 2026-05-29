@@ -55,7 +55,22 @@ export function useCreateCustomer() {
   return useMutation({
     mutationFn: async (
       input: Pick<Customer, 'full_name' | 'phone_number'> &
-        Partial<Pick<Customer, 'full_name_te' | 'address' | 'notes'>>,
+        Partial<
+          Pick<
+            Customer,
+            | 'full_name_te'
+            | 'address'
+            | 'notes'
+            | 'notebook_ref'
+            | 'phone_number_2'
+            | 'reference1_name'
+            | 'reference1_phone'
+            | 'reference1_relation'
+            | 'reference2_name'
+            | 'reference2_phone'
+            | 'reference2_relation'
+          >
+        >,
     ) => {
       if (!user) throw new Error('Not authenticated');
       const { data, error } = await supabase

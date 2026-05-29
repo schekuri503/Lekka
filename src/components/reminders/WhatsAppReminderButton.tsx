@@ -13,22 +13,44 @@ interface Props {
   dueDate: string;
   kind: 'due' | 'late';
   size?: 'sm' | 'default';
+  /** When set, message a reference/guarantor about this customer instead. */
+  referenceName?: string;
+  /** Optional custom label for the button. */
+  label?: string;
 }
 
 /** Opens WhatsApp with a pre-filled reminder. No third-party API. Completely free. */
-export function WhatsAppReminderButton({ phone, customerName, amount, dueDate, kind, size }: Props) {
+export function WhatsAppReminderButton({
+  phone,
+  customerName,
+  amount,
+  dueDate,
+  kind,
+  size,
+  referenceName,
+  label,
+}: Props) {
   const { t } = useTranslation();
   const { data: settings } = useSettings();
 
-  const template =
-    kind === 'due'
-      ? settings?.reminder_template_due ??
-        'Hi {customerName}, this is a reminder that ₹{amount} is due today. Thank you.'
-      : settings?.reminder_template_late ??
-        'Hi {customerName}, ₹{amount} was due on {dueDate}. Please update once paid. Thank you.';
+  let template: string;
+  if (referenceName) {
+    template =
+      settings?.reminder_template_reference ??
+      "Namaste {referenceName}, this is regarding {customerName}'s pending payment of ₹{amount}. Please remind them to pay. Thank you.";
+  } else if (kind === 'due') {
+    template =
+      settings?.reminder_template_due ??
+      'Hi {customerName}, this is a reminder that ₹{amount} is due today. Thank you.';
+  } else {
+    template =
+      settings?.reminder_template_late ??
+      'Hi {customerName}, ₹{amount} was due on {dueDate}. Please update once paid. Thank you.';
+  }
 
   const msg = renderTemplate(template, {
     customerName,
+    referenceName: referenceName ?? '',
     amount: formatMoney(amount, { noSymbol: true }),
     dueDate: formatDate(dueDate),
   });
@@ -42,7 +64,7 @@ export function WhatsAppReminderButton({ phone, customerName, amount, dueDate, k
     >
       <a href={whatsappUrl(phone, msg)} target="_blank" rel="noopener noreferrer">
         <MessageCircle className="h-4 w-4" />
-        <span>{t('dues.whatsapp')}</span>
+        <span>{label ?? t('dues.whatsapp')}</span>
       </a>
     </Button>
   );

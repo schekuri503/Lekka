@@ -87,6 +87,12 @@
     "name": "Full name",
     "name_te": "Name in Telugu (optional)",
     "phone": "Phone number",
+    "phone_2": "Secondary phone (optional)",
+    "references": "References / guarantors",
+    "reference": "Reference",
+    "relation": "Relation",
+    "add_loan_now": "Also create a loan/account now",
+    "notebook_ref": "Notebook ref",
     "address": "Address / village",
     "no_results": "No customers found.",
     "added": "Customer added",
@@ -121,7 +127,12 @@
     "preview": "Installment preview",
     "create": "Create account",
     "created": "Account created",
+    "updated": "Account updated",
     "deleted": "Account deleted",
+    "enter_amounts": "Enter both amounts for the loan.",
+    "status": "Status",
+    "edit_title": "Edit account",
+    "edit_hint": "Amounts and term are locked once installments are generated. To change them, delete and re-create the account.",
     "delete_title": "Delete account?",
     "delete_confirm": "This permanently deletes the account, its installments and any payment records. This cannot be undone."
   },
@@ -152,6 +163,7 @@
     "reference": "Reference (UPI ID, txn number…)",
     "save": "Save payment",
     "saved": "Payment recorded",
+    "carry_remaining": "Carry the remaining {{amount}} to the next installment",
     "void": "Void payment",
     "void_confirm": "Void this payment? This can't be undone but will keep the audit trail."
   },
@@ -172,6 +184,8 @@
     "send_whatsapp": "Send via WhatsApp",
     "template_due": "Due today template",
     "template_late": "Overdue template",
+    "message_reference": "Message reference",
+    "reference_hint": "Use {referenceName}, {customerName}, {amount} as placeholders.",
     "placeholder_hint": "Use {customerName}, {amount}, {dueDate} as placeholders."
   },
   "reports": {
@@ -195,10 +209,19 @@
     "default_apr": "Default APR %",
     "default_language": "Default language",
     "reminder_time": "Default reminder time",
+    "reminder_template_reference": "Reference reminder template",
     "save_success": "Settings saved",
     "import": "Import from notebook",
     "import_desc": "Upload a photo of a notebook page. We'll try to read it and let you review before saving.",
-    "import_cta": "Open import"
+    "import_cta": "Open import",
+    "backup": "Backup / export",
+    "backup_desc": "Download your data as CSV files to keep offline copies. Open them in Excel or Google Sheets.",
+    "backup_empty": "Nothing to export yet.",
+    "backup_customers": "Customers",
+    "backup_accounts": "Accounts",
+    "backup_installments": "Installments",
+    "backup_payments": "Payments",
+    "backup_all": "Download all"
   },
   "import": {
     "title": "Notebook import",
