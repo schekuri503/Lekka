@@ -53,6 +53,7 @@ export function CustomerForm({ customer, onDone, onCancel }: Props) {
   const [phone, setPhone] = useState(customer?.phone_number ?? '');
   const [phone2, setPhone2] = useState(customer?.phone_number_2 ?? '');
   const [address, setAddress] = useState(customer?.address ?? '');
+  const [notebookRef, setNotebookRef] = useState(customer?.notebook_ref ?? '');
   const [notes, setNotes] = useState(customer?.notes ?? '');
 
   const [ref1Name, setRef1Name] = useState(customer?.reference1_name ?? '');
@@ -95,6 +96,7 @@ export function CustomerForm({ customer, onDone, onCancel }: Props) {
       phone_number: normalizePhone(phone),
       phone_number_2: phoneOrNull(phone2),
       address: textOrNull(address),
+      notebook_ref: textOrNull(notebookRef),
       notes: textOrNull(notes),
       reference1_name: textOrNull(ref1Name),
       reference1_phone: phoneOrNull(ref1Phone),
@@ -185,14 +187,25 @@ export function CustomerForm({ customer, onDone, onCancel }: Props) {
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="address">{t('customers.address')}</Label>
-        <Input
-          id="address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Village / area"
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="address">{t('customers.address')}</Label>
+          <Input
+            id="address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Village / area"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="notebook_ref">{t('customers.notebook_ref')}</Label>
+          <Input
+            id="notebook_ref"
+            value={notebookRef}
+            onChange={(e) => setNotebookRef(e.target.value)}
+            placeholder="174"
+          />
+        </div>
       </div>
 
       {/* References / guarantors */}

@@ -127,9 +127,16 @@ export function CustomerDetail() {
               {customer.full_name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="font-display text-2xl font-semibold tracking-tight">
-                {customer.full_name}
-              </h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-display text-2xl font-semibold tracking-tight">
+                  {customer.full_name}
+                </h1>
+                {customer.notebook_ref && (
+                  <span className="rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground">
+                    {t('customers.notebook_ref')} #{customer.notebook_ref}
+                  </span>
+                )}
+              </div>
               {customer.full_name_te && (
                 <p className="text-base text-muted-foreground" lang="te">
                   {customer.full_name_te}

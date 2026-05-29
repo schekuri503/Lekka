@@ -92,6 +92,7 @@
     "reference": "Reference",
     "relation": "Relation",
     "add_loan_now": "Also create a loan/account now",
+    "notebook_ref": "Notebook ref",
     "address": "Address / village",
     "no_results": "No customers found.",
     "added": "Customer added",
@@ -162,6 +163,7 @@
     "reference": "Reference (UPI ID, txn number…)",
     "save": "Save payment",
     "saved": "Payment recorded",
+    "carry_remaining": "Carry the remaining {{amount}} to the next installment",
     "void": "Void payment",
     "void_confirm": "Void this payment? This can't be undone but will keep the audit trail."
   },

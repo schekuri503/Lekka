@@ -43,6 +43,23 @@ export function useRecordPayment() {
   });
 }
 
+export function useCarryForwardShortfall() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (installmentId: string) => {
+      const { error } = await supabase.rpc('carry_forward_shortfall', {
+        p_installment_id: installmentId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['installments'] });
+      qc.invalidateQueries({ queryKey: ['dues'] });
+    },
+  });
+}
+
 export function useVoidPayment() {
   const qc = useQueryClient();
   return useMutation({

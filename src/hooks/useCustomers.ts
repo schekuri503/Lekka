@@ -61,6 +61,7 @@ export function useCreateCustomer() {
             | 'full_name_te'
             | 'address'
             | 'notes'
+            | 'notebook_ref'
             | 'phone_number_2'
             | 'reference1_name'
             | 'reference1_phone'

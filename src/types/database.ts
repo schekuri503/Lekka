@@ -40,6 +40,7 @@ export interface Customer {
   reference2_relation: string | null;
   address: string | null;
   notes: string | null;
+  notebook_ref: string | null;
   photo_url: string | null;
   status: CustomerStatus;
   created_at: string;

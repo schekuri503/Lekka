@@ -26,9 +26,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/toast';
-import { useRecordPayment } from '@/hooks/usePayments';
+import { useRecordPayment, useCarryForwardShortfall } from '@/hooks/usePayments';
 import { parseMoney, formatMoney } from '@/lib/currency';
-import { todayISO } from '@/lib/utils';
+import { getErrorMessage, todayISO } from '@/lib/utils';
 import type { InstallmentWithStatus, PaymentMethod } from '@/types/database';
 
 interface Props {
@@ -43,12 +43,14 @@ export function PaymentModal({ open, onOpenChange, installment }: Props) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const record = useRecordPayment();
+  const carryForward = useCarryForwardShortfall();
 
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(todayISO());
   const [method, setMethod] = useState<PaymentMethod>('CASH');
   const [reference, setReference] = useState('');
   const [notes, setNotes] = useState('');
+  const [carry, setCarry] = useState(true);
 
   // Pre-fill amount with the installment balance whenever the modal opens.
   useEffect(() => {
@@ -58,6 +60,7 @@ export function PaymentModal({ open, onOpenChange, installment }: Props) {
       setMethod('CASH');
       setReference('');
       setNotes('');
+      setCarry(true);
     }
   }, [open, installment]);
 
@@ -71,6 +74,8 @@ export function PaymentModal({ open, onOpenChange, installment }: Props) {
       toast('Enter a payment amount.', 'error');
       return;
     }
+    const balance = Number(installment.balance ?? installment.due_amount);
+    const isPartial = amt > 0 && amt < balance;
     try {
       await record.mutateAsync({
         installment_id: installment.id,
@@ -82,11 +87,13 @@ export function PaymentModal({ open, onOpenChange, installment }: Props) {
         reference_number: reference.trim() || null,
         notes: notes.trim() || null,
       });
+      if (isPartial && carry) {
+        await carryForward.mutateAsync(installment.id);
+      }
       toast(t('payment.saved'), 'success');
       onOpenChange(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Save failed';
-      toast(msg, 'error');
+      toast(getErrorMessage(err, 'Save failed'), 'error');
     }
   }
 
@@ -151,12 +158,31 @@ export function PaymentModal({ open, onOpenChange, installment }: Props) {
             <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
 
+          {(() => {
+            const balanceNum = Number(installment.balance ?? installment.due_amount);
+            const shortfall = balanceNum - parseMoney(amount);
+            if (shortfall <= 0) return null;
+            return (
+              <label className="flex items-start gap-2 rounded-md border border-border/60 bg-accent/30 px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={carry}
+                  onChange={(e) => setCarry(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-primary"
+                />
+                <span>{t('payment.carry_remaining', { amount: formatMoney(shortfall) })}</span>
+              </label>
+            );
+          })()}
+
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={record.isPending}>
-              {record.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" disabled={record.isPending || carryForward.isPending}>
+              {(record.isPending || carryForward.isPending) && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               {t('payment.save')}
             </Button>
           </div>
