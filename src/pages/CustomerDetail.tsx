@@ -143,10 +143,12 @@ export function CustomerDetail() {
                 </p>
               )}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5" />
-                  {customer.phone_number}
-                </span>
+                {customer.phone_number && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5" />
+                    {customer.phone_number}
+                  </span>
+                )}
                 {customer.phone_number_2 && (
                   <span className="inline-flex items-center gap-1.5">
                     <Phone className="h-3.5 w-3.5" />
@@ -205,13 +207,15 @@ export function CustomerDetail() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="outline">
-                <a href={`tel:${customer.phone_number}`}>
-                  <Phone className="mr-1.5 h-4 w-4" />
-                  Call
-                </a>
-              </Button>
-              {open.length > 0 && (
+              {customer.phone_number && (
+                <Button asChild size="sm" variant="outline">
+                  <a href={`tel:${customer.phone_number}`}>
+                    <Phone className="mr-1.5 h-4 w-4" />
+                    Call
+                  </a>
+                </Button>
+              )}
+              {customer.phone_number && open.length > 0 && (
                 <WhatsAppReminderButton
                   phone={customer.phone_number}
                   customerName={customer.full_name}

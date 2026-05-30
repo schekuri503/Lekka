@@ -248,6 +248,21 @@
     "err_phone": "Enter a valid 10-digit phone number (starting 6-9).",
     "err_amount": "Amounts must be between ₹1,000 and ₹1,00,00,000."
   },
+  "voice": {
+    "button": "Voice add",
+    "title": "Add by voice",
+    "subtitle": "Tap the mic and say the customer's name and amount. Date is optional — defaults to today. Saves as a BC weekly account.",
+    "start": "Start",
+    "stop": "Stop",
+    "heard": "Heard",
+    "summary": "Will create",
+    "profit": "profit",
+    "optional": "optional",
+    "not_supported": "Voice input isn't supported on this browser. Try Chrome or Safari, or type the details manually.",
+    "error": "Voice error",
+    "err_name": "Couldn't catch a name. Please type it.",
+    "err_amount": "Please enter the amount."
+  },
   "print": {
     "title": "Print ledger",
     "subtitle": "A notebook-style page for paper backups. Use your browser's print dialog to save as PDF.",

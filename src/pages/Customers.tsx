@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Plus, ChevronRight, Phone, MapPin } from 'lucide-react';
+import { Plus, ChevronRight, Phone, MapPin, Mic } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -18,12 +18,14 @@ import {
 import { Card } from '@/components/ui/card';
 import { CustomerForm } from '@/components/customers/CustomerForm';
 import { CustomerSearch } from '@/components/customers/CustomerSearch';
+import { VoiceAddDialog } from '@/components/customers/VoiceAddDialog';
 import { useCustomers } from '@/hooks/useCustomers';
 
 export function Customers() {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   const { data: customers, isLoading } = useCustomers(search);
 
@@ -39,13 +41,19 @@ export function Customers() {
           </p>
         </div>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="lg" className="gap-2">
-              <Plus className="h-4 w-4" />
-              {t('customers.add')}
-            </Button>
-          </DialogTrigger>
+        <div className="flex flex-wrap gap-2">
+          <Button size="lg" variant="outline" className="gap-2" onClick={() => setVoiceOpen(true)}>
+            <Mic className="h-4 w-4" />
+            {t('voice.button')}
+          </Button>
+
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="gap-2">
+                <Plus className="h-4 w-4" />
+                {t('customers.add')}
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t('customers.add')}</DialogTitle>
@@ -55,9 +63,12 @@ export function Customers() {
               onDone={() => setDialogOpen(false)}
               onCancel={() => setDialogOpen(false)}
             />
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </header>
+
+      <VoiceAddDialog open={voiceOpen} onOpenChange={setVoiceOpen} />
 
       <CustomerSearch value={search} onChange={setSearch} />
 
